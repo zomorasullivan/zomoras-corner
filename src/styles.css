@@ -247,3 +247,44 @@ footer {
   }
   .button:hover, .post-card:hover { transform: none; }
 }
+
+/* The writing corner uses the same soft surfaces and warm accents. */
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: .65; }
+button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+}
+.writer-link { display: block; margin-top: 8px; color: var(--link); text-decoration: underline; }
+.writer h1 { font-size: clamp(2.5rem, 6vw, 4rem); }
+.writer h2 { font-family: 'Playfair Display', serif; font-weight: 500; }
+.demo-note, .field-hint { color: var(--muted); font-size: .9rem !important; }
+.demo-note { border-left: 3px solid var(--gold); padding-left: 16px; }
+.editor { display: grid; gap: 12px; margin: 28px 0; padding: 28px; border: 1px solid var(--line); border-radius: 22px; background: #fffdf7; }
+.editor h2 { margin: 0 0 10px; }
+.editor label { font-weight: 500; }
+.editor input, .editor textarea { width: 100%; min-width: 0; border: 1px solid #b9afbb; border-radius: 10px; background: #fff; color: var(--ink); padding: 12px; }
+.editor textarea { resize: vertical; }
+.password-field { position: relative; }
+.password-field input { padding-right: 56px; }
+.password-toggle { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); }
+.password-toggle:hover { background: #F2BE3A25; color: var(--ink); }
+.password-toggle[aria-pressed="true"] { background: var(--gold); color: var(--ink); }
+/* Suppress Edge's built-in reveal control, including on confirmation. */
+.editor input::-ms-reveal { display: none; }
+.editor > .button { justify-self: start; }
+.editor .field-hint { margin: 0; }
+.writer-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.writer-actions .button, .writer-actions a { margin-top: 0; }
+.quiet-button { border: 0; background: transparent; color: var(--link); text-decoration: underline; text-underline-offset: 4px; padding: 10px 4px; }
+.danger { color: #9c245d; }
+.writer-list { display: grid; gap: 18px; }
+.writer-list .post-card { min-height: 0; overflow-wrap: anywhere; }
+.form-error { background: #F23ACA10; color: #8c2054; border-left: 3px solid var(--pink); padding: 12px 16px; }
+.form-notice { background: #3AF26215; color: #245532; border-left: 3px solid var(--green); padding: 12px 16px; }
+.delete-confirm { margin-top: 16px; border-top: 1px solid var(--line); }
+.story-paragraph { white-space: pre-wrap; }
+.post-card, .single { overflow-wrap: anywhere; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 700px) { .editor { padding: 20px; } }
