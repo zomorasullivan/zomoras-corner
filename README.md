@@ -21,6 +21,12 @@ This is intentionally a **browser-only demo**, not server authentication: localS
 
 The original sample stories live in `content/posts.json`. Edits in the demo do not change that file or GitHub. Publishing shared posts later would require a backend.
 
+### Coffee-break drafts
+
+While writing, **Save draft for later** downloads a dated JSON file containing `Title`, `A Short Introduction`, and `Your Story`. Empty fields are allowed, so unfinished thoughts can be saved without publishing. Keep the downloaded file wherever you archive your writing.
+
+Log in and choose **Load draft** to restore those fields as a new, unpublished story. Loading asks before replacing unsaved writing; invalid files leave your writing intact. Imported drafts never overwrite existing published posts. The file contains plain text, not your password. Downloads do not automatically update when you continue typing; save another copy to archive your latest changes.
+
 ## GoDaddy Node.js hosting
 
 - Repository root: this folder; branch: `main`.

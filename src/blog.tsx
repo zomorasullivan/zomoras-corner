@@ -1,7 +1,8 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
 import type { ReactNode, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import initialPosts from '../content/posts.json';
+import { parseDraft, serializeDraft } from './drafts';
 
 export type Post = typeof initialPosts[number];
 const POSTS_KEY = 'corner.posts.v1';
@@ -101,6 +102,36 @@ export function Writer() {
   const [originalSlug, setOriginalSlug] = useState<string>();
   const [deleteSlug, setDeleteSlug] = useState<string>();
   const [dirty, setDirty] = useState(false);
+  const draftFile = useRef<HTMLInputElement>(null);
+
+  function saveDraft() {
+    if (!draft) return;
+    const url = URL.createObjectURL(new Blob([serializeDraft(draft)], { type: 'application/json;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    const name = draft.title.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 60) || 'untitled';
+    link.download = `${name}-draft-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setError('');
+    setNotice('Draft download started. Keep the JSON file, then use Load draft whenever you’re ready. Nothing has been published.');
+  }
+
+  async function loadDraft(file: File) {
+    try {
+      if (file.size > 1024 * 1024) throw new Error('Choose a draft JSON file smaller than 1 MB.');
+      const fields = parseDraft(await file.text());
+      if (dirty && !window.confirm('Replace your unsaved changes with this draft? Save a draft first if you want to keep them.')) return;
+      setDraft({ ...blankPost(), ...fields });
+      setOriginalSlug(undefined);
+      setDeleteSlug(undefined);
+      setDirty(true);
+      setError('');
+      setNotice('Draft loaded as a new, unpublished story. Pick up wherever you left off.');
+    } catch (e) { setError(e instanceof Error ? e.message : 'Could not open this draft. Your current writing has been kept.'); }
+  }
 
   async function signIn(event: FormEvent) {
     event.preventDefault(); setError(''); setBusy(true);
@@ -145,13 +176,15 @@ export function Writer() {
       {!blog.hasPassword && <><label htmlFor="confirm-password">Confirm password</label><input id="confirm-password" type="password" autoComplete="new-password" required minLength={8} maxLength={256} value={confirmation} onChange={e => setConfirmation(e.target.value)} /><p className="field-hint">Use at least 8 characters. This password is just for your demo on this browser.</p></>}
       <button className="button" disabled={busy || !!blog.storageError}>{busy ? 'One moment…' : blog.hasPassword ? 'Log in' : 'Set password & start writing'}</button>
     </form> : <>
-      <div className="writer-actions"><button className="button" onClick={() => edit()}>Write a story</button><button className="quiet-button" onClick={() => { if (dirty && !window.confirm('Discard unsaved changes and log out?')) return; blog.logout(); setDraft(null); setDirty(false); setNotice(''); }}>Log out</button></div>
+      <div className="writer-actions"><button className="button" onClick={() => edit()}>Write a story</button><button type="button" className="quiet-button" onClick={() => draftFile.current?.click()}>Load draft</button><button className="quiet-button" onClick={() => { if (dirty && !window.confirm('Discard unsaved changes and log out?')) return; blog.logout(); setDraft(null); setDirty(false); setNotice(''); }}>Log out</button></div>
+      <input ref={draftFile} type="file" accept=".json,application/json" hidden aria-label="Load draft JSON file" onChange={e => { const file = e.currentTarget.files?.[0]; e.currentTarget.value = ''; if (file) void loadDraft(file); }} />
       {draft && <form className="editor" onSubmit={publish}>
         <h2>{originalSlug ? 'A little polishing' : 'A fresh page'}</h2>
         <label htmlFor="story-title">Title</label><input autoFocus id="story-title" required maxLength={160} value={draft.title} onChange={e => { setDraft({ ...draft, title: e.target.value }); setDirty(true); }} />
         <label htmlFor="story-summary">A short introduction</label><textarea id="story-summary" required maxLength={500} rows={3} value={draft.summary} onChange={e => { setDraft({ ...draft, summary: e.target.value }); setDirty(true); }} />
         <label htmlFor="story-body">Your story</label><textarea id="story-body" required maxLength={50000} rows={12} value={draft.body} onChange={e => { setDraft({ ...draft, body: e.target.value }); setDirty(true); }} /><p className="field-hint">Leave a blank line between paragraphs.</p>
-        <div className="writer-actions"><button className="button">{originalSlug ? 'Save changes' : 'Publish story'}</button><button type="button" className="quiet-button" onClick={() => { if (!dirty || window.confirm('Discard this unsaved draft?')) { setDraft(null); setDirty(false); } }}>Cancel</button></div>
+        <div className="writer-actions"><button className="button">{originalSlug ? 'Save changes' : 'Publish story'}</button><button type="button" className="quiet-button" onClick={saveDraft}>Save draft for later</button><button type="button" className="quiet-button" onClick={() => { if (!dirty || window.confirm('Discard this unsaved draft?')) { setDraft(null); setDirty(false); } }}>Cancel</button></div>
+        <p className="field-hint">Coffee break? Save a JSON draft, even if some fields are empty. Load it later to continue as a new story.</p>
       </form>}
       <h2>Your stories</h2>{!blog.posts.length && <p>A fresh start. Your first story can be anything you like.</p>}
       <div className="writer-list">{blog.posts.map(post => <article className="post-card" key={post.slug}><p className="date">{post.date}</p><h2>{post.title}</h2><div className="writer-actions"><Link to={'/blog/' + post.slug}>Read</Link><button className="quiet-button" onClick={() => edit(post)}>Edit<span className="sr-only"> {post.title}</span></button><button className="quiet-button danger" onClick={() => setDeleteSlug(post.slug)}>Delete<span className="sr-only"> {post.title}</span></button></div>
