@@ -1,5 +1,6 @@
 import { Icon } from './Icon';
 import { HeroVideo } from './HeroVideo';
+import { DailyInspiration } from './DailyInspiration';
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, HashRouter, Link, NavLink, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom';
@@ -28,7 +29,7 @@ function Home() {
   const published = posts.filter(p => p.status === 'published');
   return <>
     <section className="home-hero"><div className="hero-copy"><p className="eyebrow"><span className="dot"/> WELCOME TO MY LITTLE CORNER</p><h1>Life’s little things.<br/><em>Worth a story.</em></h1><p className="lead">A warm cup. An ordinary day. A thought worth keeping.<br className="desktop-break"/> A place for the moments in between.</p><div className="hero-actions"><Link className="button" to="/blog">Find your next read <span><Icon name="outward"/></span></Link><span className="hand-note">coffee is always welcome <Icon name="coffee"/></span></div><p className="hero-footnote">{settings.tagline}</p></div>
-      <div className="hero-art"><span className="tape"/><HeroVideo/><div className="paper-note"><span>NOTE TO SELF</span>There is good<br/>in the ordinary.<i><Icon name="heart"/></i></div><span className="sparkle"><Icon name="flower"/></span></div>
+      <div className="coffee-moment"><HeroVideo/><div className="coffee-moment-heading"><span className="eyebrow">THE DAILY PAUSE</span><h2>Let the coffee cool.<br/><em>Let your soul catch up.</em></h2></div><DailyInspiration/></div>
     </section>
     <div className="category-ribbon"><span>MAKE YOURSELF AT HOME</span>{categories.map((c, i) => <Link key={c} to={`/blog?category=${encodeURIComponent(c)}`}><i className={`color-dot color-${i}`}/>{c} <Icon name="outward"/></Link>)}</div>
     <section className="section stories-section"><div className="section-heading"><div><p className="eyebrow">PAGES FROM THE NOTEBOOK</p><h2>A little lately.</h2></div><Link className="text-link" to="/blog">All stories <Icon name="outward"/></Link></div>

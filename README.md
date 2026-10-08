@@ -43,6 +43,16 @@ The original sample stories were copied from `content/posts.json`; she can edit 
 
 ## Hosting
 
+### Cloudflare Pages
+
+The shareable site is `https://zomorascorner.pages.dev`, under the existing Rebeltechoxford Cloudflare account. It uses the free Pages static hosting plan with a Direct Upload deployment. Build with `npm run build`, then upload only the contents of `dist/` to this Pages project. Do not upload the repository, private draft, or writer setup code. No Node runtime or start command is needed. Cloudflare handles SPA deep links automatically when no top-level `404.html` is present. Direct Upload does not automatically deploy GitHub pushes; upload a fresh build for future code changes. Blog edits and photos publish directly through Supabase without rebuilding.
+
+### Daily pause
+
+The hero uses licensed stationary mug footage (see `public/media/CREDITS.md`), subtle depth-animated steam, a static poster, and a pause control. Reduced-motion and data-saving preferences disable autoplay.
+
+The `daily-inspiration` Supabase Edge Function fetches ZenQuotes' daily quote and Bible Gateway's NLT verse-of-the-day feed. It stores only the latest readings, refreshes on the first visit of each Chicago calendar day, and limits failed refresh attempts to once per 15 minutes. Provider outages retain the last successful reading with its date. Attribution links are displayed with the readings. No paid API subscription or scheduled job is required. Verify parsers with `node --test tests/providers.test.mjs`.
+
 ### GoDaddy or another Node host
 
 Install `npm ci`, build `npm run build`, start `npm start`. `server.mjs` serves `dist/`, binds to `0.0.0.0`, and reads `PORT` (default 3000). Direct page links fall back to the SPA. Use HTTPS. No private Supabase credentials are needed on the hosting platform.

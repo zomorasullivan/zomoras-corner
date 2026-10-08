@@ -12,6 +12,9 @@ test('coffee hero loops silently, pauses, and respects reduced motion', async ({
   await mockBackend(page);
   await page.goto('/');
   const video = page.locator('.hero-video video');
+  await expect(page.getByText('A small step is still a step.', {exact:false})).toBeVisible();
+  await expect(page.getByText('Psalm 46:10 · NLT')).toBeVisible();
+  await page.locator('.coffee-moment').screenshot({path:'.test-artifacts/coffee-hero-desktop.png'});
   await expect(page.getByRole('button', {name:'Pause coffee video'})).toBeVisible();
   expect(await video.evaluate((v: HTMLVideoElement) => v.muted && v.loop && v.playsInline)).toBeTruthy();
   await page.getByRole('button', {name:'Pause coffee video'}).click();
@@ -42,6 +45,10 @@ async function mockBackend(page: Page, writer = false) {
     const req=route.request(); const url=new URL(req.url()); const method=req.method();
     const send=(body: unknown, status=200) => route.fulfill({status,json:body,headers:{'access-control-allow-origin':'*'}});
     if(method==='OPTIONS') return route.fulfill({status:204,headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*','access-control-allow-methods':'*'}});
+    if(url.pathname==='/functions/v1/daily-inspiration') {
+      const day=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+      return send({quote:{text:'A small step is still a step.',author:'Test author',day},verse:{text:'Test verse text for layout verification.',reference:'Psalm 46:10',version:'NLT',day}});
+    }
     if(url.pathname.startsWith('/rest/v1/writers')) return send(writer ? [{email:'writer@example.invalid'}] : []);
     if(url.pathname.startsWith('/rest/v1/site_settings')) return send(settings);
     if(url.pathname.startsWith('/rest/v1/posts')) {
@@ -67,6 +74,19 @@ async function mockBackend(page: Page, writer = false) {
   });
   return { rows:()=>rows, uploads, setRows:(next:Row[])=>{rows=next;} };
 }
+
+test('daily readings label stale content and handle unavailable providers', async ({page}) => {
+  await mockBackend(page);
+  await page.route(`${api}/functions/v1/daily-inspiration`, route => route.fulfill({json:{
+    quote:{text:'A saved encouragement.',author:'Test author',day:'2025-01-01'},verse:null,
+  }}));
+  await page.goto('/');
+  await expect(page.getByText('Saved reading · 2025-01-01')).toBeVisible();
+  await expect(page.getByText('Today’s NLT verse is taking a little longer.',{exact:false})).toBeVisible();
+  await page.route(`${api}/functions/v1/daily-inspiration`, route => route.fulfill({status:503,json:{error:'Unavailable'}}));
+  await page.reload();
+  await expect(page.getByText('Today’s quote will be back soon.',{exact:false})).toBeVisible();
+});
 
 test('reader pages, filtering, mobile layout and password visibility', async ({page})=>{
   const backend=await mockBackend(page);

@@ -12,7 +12,7 @@ export function HeroVideo() {
   const [loaded, setLoaded] = useState(canAutoplay);
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
-  const base = `${import.meta.env.BASE_URL}media/cozy-coffee`;
+  const base = `${import.meta.env.BASE_URL}media/steaming-coffee`;
 
   useEffect(() => {
     const media = video.current!;
@@ -45,15 +45,15 @@ export function HeroVideo() {
     }
   }
 
-  return <div className="hero-video">
-    <img className="hero-video-poster" src={`${base}.jpg`} alt="A quiet coffee break, warming up with a red ceramic cup." fetchPriority="high"/>
+  return <div className={`hero-video ${playing ? 'is-playing' : ''}`}>
+    <img className="hero-video-poster" src={`${base}.jpg`} alt="Steam drifting from a warm ceramic coffee cup on a quiet, sunlit table." fetchPriority="high"/>
     <video ref={video} src={loaded && !failed ? `${base}.mp4` : undefined} poster={`${base}.jpg`}
       muted loop playsInline preload={loaded ? 'metadata' : 'none'} aria-hidden="true" tabIndex={-1}
       hidden={failed} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
       onError={() => { setFailed(true); setPlaying(false); }}/>
+    <div className="coffee-steam" aria-hidden="true"><i/><i/><i/></div>
     {!failed && <button type="button" className="hero-video-toggle" onClick={toggle} aria-label={playing ? 'Pause coffee video' : 'Play coffee video'}>
       <Icon name={playing ? 'pause' : 'play'}/><span>{playing ? 'Pause' : 'Play'}</span>
     </button>}
-    <span className="hero-video-caption">a little pause, just for you.</span>
   </div>;
 }
