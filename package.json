@@ -16,6 +16,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@mui/icons-material": "9.4.0",
+    "@mui/material": "9.4.0",
     "@supabase/supabase-js": "2.117.3",
     "@types/node": "22.20.5",
     "@types/react": "19.3.0",

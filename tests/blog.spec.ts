@@ -8,6 +8,26 @@ const photoPath = `${userId}/10000000-0000-4000-8000-000000000020.jpg`;
 const settings = { id: 1, title: 'Zomora’s Corner', tagline: 'Little joys.', about: 'A quiet corner.', email: '', instagram: '' };
 type Row = Record<string, any>;
 
+test('coffee hero loops silently, pauses, and respects reduced motion', async ({page}) => {
+  await mockBackend(page);
+  await page.goto('/');
+  const video = page.locator('.hero-video video');
+  await expect(page.getByRole('button', {name:'Pause coffee video'})).toBeVisible();
+  expect(await video.evaluate((v: HTMLVideoElement) => v.muted && v.loop && v.playsInline)).toBeTruthy();
+  await page.getByRole('button', {name:'Pause coffee video'}).click();
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.paused)).toBeTruthy();
+  await page.getByRole('button', {name:'Play coffee video'}).click();
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.paused)).toBeFalsy();
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'.test-artifacts/coffee-hero-mobile.png',fullPage:true});
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.reload();
+  await expect(video).not.toHaveAttribute('src');
+  await expect(page.locator('.hero-video-poster')).toBeVisible();
+  await expect(page.getByRole('button', {name:'Play coffee video'})).toBeVisible();
+});
+
 async function mockBackend(page: Page, writer = false) {
   let rows: Row[] = [];
   const uploads: string[] = [];

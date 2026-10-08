@@ -11,6 +11,10 @@ button:disabled { opacity:.55; cursor:wait; }
 button,a,input,textarea,select { -webkit-tap-highlight-color:#F2BE3A40; }
 :focus-visible { outline:3px solid var(--blue); outline-offset:4px; }
 img { display:block; max-width:100%; }
+.ui-icon.MuiSvgIcon-root { display:inline-block; width:1em; height:1em; font-size:inherit; vertical-align:-.15em; flex-shrink:0; }
+.button .ui-icon,.text-link .ui-icon,.quiet-button .ui-icon { font-size:1.25em; }
+.password-toggle .ui-icon { font-size:22px; }
+.hand-note .ui-icon { color:#866324; margin-left:5px; }
 figure { margin:0; }
 h1,h2,h3,p { margin-top:0; }
 h1,h2,h3 { font-family:var(--serif); font-weight:500; line-height:1.15; }
@@ -49,6 +53,12 @@ main { max-width:1280px; margin:auto; }
 .hand-note { font-family:var(--serif); font-style:italic; color:var(--muted); font-size:.82rem; transform:rotate(-5deg); }
 .hero-footnote { font-size:.67rem; color:var(--muted); letter-spacing:.025em; margin-top:34px; }
 .hero-art { position:relative; transform:rotate(3deg); background:#fffef8; padding:15px 15px 44px; box-shadow:0 14px 35px #43463316; }
+.hero-video { position:relative; aspect-ratio:4/5; background:#847258; }
+.hero-video video,.hero-video-poster { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 60%; }
+.hero-video video[hidden] { display:none; }
+.hero-video-caption { position:absolute; bottom:-32px; left:0; right:0; text-align:center; font-family:var(--serif); font-style:italic; font-size:.8rem; }
+.hero-video-toggle { position:absolute; z-index:1; right:12px; bottom:12px; display:flex; align-items:center; gap:6px; min-height:44px; border:1px solid #fff8; border-radius:24px; padding:8px 13px; color:var(--ink); background:#fffdf2ed; box-shadow:0 2px 12px #0001; font-size:.73rem; }
+.hero-video-toggle .ui-icon { font-size:1.3rem; }
 .tape { position:absolute; z-index:2; width:95px; height:28px; background:#eadcbca6; top:-12px; left:36%; transform:rotate(-8deg); }
 .sparkle { position:absolute; top:15px; right:-22px; color:var(--blue); font-size:4rem; }
 .paper-note { position:absolute; bottom:-21px; left:-32px; padding:20px 28px; background:#f8e7ed; font-family:var(--serif); font-size:1.38rem; line-height:1.25; transform:rotate(-11deg); box-shadow:0 7px 15px #342b3210; }
