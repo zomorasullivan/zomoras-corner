@@ -17,9 +17,10 @@ app.get('/{*path}', (req, res, next) => {
   res.sendFile(join(dist, 'index.html'));
 });
 
-const port = Number(process.env.PORT || 3000);
+// GoDaddy supplies the runtime port; 3000 is only the local fallback.
+const port = process.env.PORT || 3000;
 const server = app.listen(port, '0.0.0.0', () => {
-  console.log(`Zamora's Corner listening on port ${server.address().port}`);
+  console.log(`Zomora's Corner listening on 0.0.0.0:${server.address().port}`);
 });
 
 for (const signal of ['SIGTERM', 'SIGINT']) {
