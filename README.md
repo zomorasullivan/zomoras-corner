@@ -1,34 +1,58 @@
-# A Little Corner - Zamora prototype
+# Zomora’s Corner
 
-A small React + TypeScript + Vite blog demo.
+A personal notebook built with React, TypeScript, Vite, and a dedicated Supabase project. Stories and photos are shared across devices. Visitors read published stories; only the designated writer can manage content.
 
-## Run
+## Run and verify
 
 ```sh
-npm install
+npm ci
 npm run dev
+npm run build
+npm test
 ```
 
-Open the URL printed by Vite. `npm run build` checks TypeScript and creates the production build.
+Use Node 22.12+ (or 20.19+). Browser tests use installed Microsoft Edge on Windows; elsewhere install Playwright Chromium with `npx playwright install chromium`. UI tests mock the backend so they never publish test stories to the live site. Database authorization checks are in `supabase/tests/access.sql` and roll back their fixtures.
 
-## Writing stories
+## Her first visit
 
-Open **Writer login** in the footer (or `/writer`). On your first visit, choose and confirm a password of at least 8 characters. Once logged in, create, read, edit, or delete stories. Deleting requires confirmation. Log out to return to read-only mode; refreshing also logs you out.
+Open **Writer login** in the footer, then **First visit? Set up your account**. Enter the private setup code from the local, Git-ignored `writer-setup.txt`, then choose a password. The code expires seven days after it was issued and creates only the pre-authorized writer’s account. No email is sent. Treat this code like a password; never commit it or put it in frontend settings. After activation, use the designated email and chosen password to log in.
 
-The password is stored as a salted PBKDF2-SHA-256 hash (210,000 iterations), never as plaintext. This requires HTTPS or localhost for Web Crypto.
+The initial account has deliberately not been activated so its owner can choose her own password. Passwords are managed by Supabase Auth, not stored by this application. Signed-in writers can change their password under **A little help & housekeeping**. Email password recovery is not configured; an administrator must handle recovery through Supabase Auth. Do not enable email flows until a suitable SMTP service is configured.
 
-This is intentionally a **browser-only demo**, not server authentication: localStorage holds the stories and password hash, and the login is a UI gate that someone with browser tools can bypass. Every browser has its own password and posts. Other visitors see the original sample stories. Clearing this site's browser data removes local posts and resets the password; there is no password recovery. Do not use this to protect private content. Drafts are not autosaved.
+## Writing, photos, and coffee breaks
 
-The original sample stories live in `content/posts.json`. Edits in the demo do not change that file or GitHub. Publishing shared posts later would require a backend.
+- **Write a story** opens the editor. Add a title, introduction, body, and category.
+- **Add photos** accepts JPG, PNG, or WebP, up to eight per story. Photos are resized to at most 1600 pixels, re-encoded as JPEG, and stripped of original metadata. Add accessible descriptions and optional captions; the first photo is the cover. Export HEIC images as JPG first.
+- **Save draft** stores unfinished writing and photos privately online. **Publish story** makes them visible to readers. Published stories can be edited, returned to drafts, or deleted with confirmation.
+- A device recovery copy is saved while typing. It is a fallback, not a replacement for saving online. **Recover device draft** restores it after leaving an editor. Clearing browser storage removes this recovery copy, but not online drafts.
+- **Download a backup** saves a JSON file with the words and embedded photos. **Load JSON draft** creates a new private draft; the original three-field JSON format is still supported. Imports never overwrite published stories.
+- **Edit my corner** updates the site name, tagline, about text, and optional public contact details.
+- Search, category filters, individual story pages, and the photo diary update from published content. Existing browser-only stories can be imported from the same browser/address under housekeeping.
 
-## GoDaddy Node.js hosting
+Concurrent edits are checked at save time to avoid silently overwriting another device’s changes. Keep JSON backups of important stories. Photo cleanup removes your unreferenced uploads older than 24 hours; save device-only drafts online before using it.
 
-- Repository root: this folder; branch: `main`.
-- Node: 22.12+ (or 20.19+); the `engines` field records Vite's minimum requirement.
-- Install: `npm ci` (production-only installs also include the build tools).
-- Build: `npm run build`.
-- Start: `npm start`.
+## Backend and privacy
 
-`server.mjs` serves only the production `dist/` folder, binds to `0.0.0.0`, and reads GoDaddy's `PORT` environment variable (defaults to 3000 locally). Direct page links fall back to `index.html`; missing assets return 404. HTTPS is supplied by the host and is needed for password hashing outside localhost. No database or server-side password is required for this browser-only demo.
+The project is **Zomora-Corner**, reference `moqpjxzkhdmruqxpjvpz`. It is separate from other apps. `src/supabase.ts` contains only the public project URL and publishable key. These are intentionally safe to ship; database and Storage row-level policies enforce access. Optional `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` build variables override the defaults. Never add a service-role key to Vite variables.
 
-After pushing, redeploy the latest commit in GoDaddy's preview. A server is now included for hosting the files; posts and login still stay in each visitor's browser.
+Schema migrations are in `supabase/migrations`. The writer allowlist and setup secret are provisioned separately, so personal account details and credentials stay out of source control. The `activate-writer` Edge Function uses its server-only service credentials after checking an expiring 256-bit setup code hash. Its gateway JWT check is disabled because activation happens before a user exists; it authenticates the setup code itself and never resets existing accounts.
+
+Drafts are protected by database policies. The photo bucket is private; visitors can obtain short-lived signed URLs only for photos referenced by published stories. A previously issued URL may keep working for up to ten minutes after unpublishing. Setup records have RLS enabled with no browser policies and all browser grants revoked; the Supabase “RLS Enabled No Policy” informational advisory is intentional for this service-only table.
+
+The original sample stories were copied from `content/posts.json`; she can edit or delete them. The local `story-draft.json` remains private and ignored by Git.
+
+## Hosting
+
+### GoDaddy or another Node host
+
+Install `npm ci`, build `npm run build`, start `npm start`. `server.mjs` serves `dist/`, binds to `0.0.0.0`, and reads `PORT` (default 3000). Direct page links fall back to the SPA. Use HTTPS. No private Supabase credentials are needed on the hosting platform.
+
+### GitHub Pages or another static host
+
+The included `.github/workflows/static.yml` installs dependencies, runs `npm run build:pages`, and deploys only `dist/` on pushes to `main`. This sets the base to `/zomoras-corner/` and uses hash routes, including `/zomoras-corner/#/writer`, so direct links work without a Node server. Select GitHub Actions as the source in repository Settings → Pages. A public repository can use Pages on GitHub Free. Regular static hosts with SPA rewrites can use `npm run build` and `dist/` instead.
+
+The frontend must be deployed for visitors to see these changes; provisioning Supabase does not redeploy the website.
+
+### Free tier
+
+This Supabase project was created at $0 on the Free plan, without an upgrade. The plan has quotas (including 500 MB database and 1 GB file storage) and may pause after a week of inactivity. Check current [Supabase pricing](https://supabase.com/pricing) before changing plans. Photo compression helps conserve space; the app does not purchase capacity automatically. GoDaddy hosting charges are separate.
