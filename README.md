@@ -47,6 +47,8 @@ The original sample stories were copied from `content/posts.json`; she can edit 
 
 Install `npm ci`, build `npm run build`, start `npm start`. `server.mjs` serves `dist/`, binds to `0.0.0.0`, and reads `PORT` (default 3000). Direct page links fall back to the SPA. Use HTTPS. No private Supabase credentials are needed on the hosting platform.
 
+GoDaddy's development preview may instead run `npm run dev`. Vite also binds to `0.0.0.0` and reads `PORT`, without falling back to another port if it is occupied. The known GoDaddy preview hostname is allowed explicitly; if it changes, add the exact hostname through `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS`. Local writer setup/draft files are denied by Vite. Production should use `npm start` after building.
+
 ### GitHub Pages or another static host
 
 The included `.github/workflows/static.yml` installs dependencies, runs `npm run build:pages`, and deploys only `dist/` on pushes to `main`. This sets the base to `/zomoras-corner/` and uses hash routes, including `/zomoras-corner/#/writer`, so direct links work without a Node server. Select GitHub Actions as the source in repository Settings → Pages. A public repository can use Pages on GitHub Free. Regular static hosts with SPA rewrites can use `npm run build` and `dist/` instead.
